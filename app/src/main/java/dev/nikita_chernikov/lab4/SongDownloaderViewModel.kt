@@ -54,25 +54,33 @@ class SongDownloaderViewModel(application: App, val sqliteManager: SQLiteManager
     private suspend fun downloadSong()
     {
         try {
-            val songResponse = withContext(Dispatchers.IO) {
+            val song = withContext(Dispatchers.IO) {
                 val request = Request.Builder()
                     .url("https://webradio.io/api/radio/pi/current-song")
                     .build()
 
-                client.newCall(request).execute().use { response ->
+                val songResponse = client.newCall(request).execute().use { response ->
                     val body = response.body?.string() ?: throw IllegalArgumentException("Body cannot be null")
                     json.decodeFromString<WebRadioSongResponse>(body)
                 }
+
+                val lastSong = sqliteManager.getLastSong()
+                if (lastSong != null && lastSong.artist == songResponse.artist && lastSong.title == songResponse.title)
+                {
+                    return@withContext null
+                }
+
+                val song = Song(title = songResponse.title, artist = songResponse.artist)
+                sqliteManager.addSong(song)
+
+                return@withContext song
             }
 
-            val lastSong = sqliteManager.getLastSong()
-            if (lastSong != null && lastSong.artist == songResponse.artist && lastSong.title == songResponse.title)
+            if (song == null)
             {
                 return
             }
 
-            val song = Song(title = songResponse.title, artist = songResponse.artist)
-            sqliteManager.addSong(song)
             _songFlow.emit(SongDownloadResult(song = song))
         }
         catch (e: Exception) {
