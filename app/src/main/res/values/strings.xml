@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Lab4</string>
+    <string name="id_full_name_text">%1$d. %2$s - %3$s</string>
+    <string name="created_at_text">%1$s</string>
+    <string name="id_full_name_example">1. Nirvana - Smells like teen spirit</string>
+    <string name="created_at_example">01.01.2025 00:00</string>
+    <string name="no_internet_error">No internet connection, application will run in offline mode.</string>
+    <string name="unknown_error">An unknown error occurred.</string>
+</resources>
